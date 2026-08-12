@@ -1,0 +1,5 @@
+venv/
+UrbanSound8K/
+target/
+.holochain/
+*.npy
