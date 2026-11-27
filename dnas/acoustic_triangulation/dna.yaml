@@ -1,9 +1,10 @@
 ---
 manifest_version: "1"
 name: acoustic_triangulation_dna
-uuid: 00000000-0000-0000-0000-000000000000
-properties: ~
-zomes:
-  - name: acoustic_triangulation
-    hash: ~
-    bundled: "../../target/wasm32-unknown-unknown/release/acoustic_triangulation.wasm"
+integrity:
+  network_seed: ~
+  properties: ~
+  zomes:
+    - name: acoustic_triangulation
+      hash: ~
+      bundled: "../../target/wasm32-unknown-unknown/release/acoustic_triangulation.wasm"

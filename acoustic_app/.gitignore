@@ -1,0 +1,50 @@
+# Python & Virtual Environments
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Editors & IDEs
+/.idea
+/.vscode
+*.swp
+*~*
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Rust & Holochain Build Artifacts
+/dist/
+/target/
+/**/target/
+/.cargo/
+*.wasm
+*.happ
+*.webhapp
+*.zip
+*.dna
+.hc*
+.running
+.hc
+*.lair
+/tmp/
+
+# Node & Package Managers
+/**/node_modules/
+/.yarn
+
+# Heavy Raw Datasets & Extracted Feature Caches (Do Not Commit)
+UrbanSound8K/
+X_features.npy
+y_labels.npy
+fold_assignments.npy
+
+# Whitelist Deliverables & Benchmark Audio
+!src/gunshot_detector.tflite
+!src/mean.npy
+!src/std.npy
+!data/custom_data/**
+!data/unseen_test/**

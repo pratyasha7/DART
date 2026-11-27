@@ -1,0 +1,7 @@
+---
+manifest_version: "1"
+name: acoustic_app
+ui:
+  bundled: ~
+happ_manifest:
+  bundled: "./acoustic_app.happ"

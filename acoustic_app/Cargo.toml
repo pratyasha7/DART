@@ -1,0 +1,21 @@
+[profile.dev]
+opt-level = "z"
+
+[profile.release]
+opt-level = "z"
+
+[workspace]
+members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
+resolver = "2"
+
+[workspace.dependencies]
+hdi = "=0.6.5"
+hdk = "=0.5.5"
+holochain_serialized_bytes = "*"
+serde = "1.0"
+
+[workspace.dependencies.acoustic_app]
+path = "dnas/acoustic_app/zomes/coordinator/acoustic_app"
+
+[workspace.dependencies.acoustic_app_integrity]
+path = "dnas/acoustic_app/zomes/integrity/acoustic_app"

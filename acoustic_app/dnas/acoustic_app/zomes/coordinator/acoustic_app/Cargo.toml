@@ -1,0 +1,14 @@
+[package]
+name = "acoustic_app"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "acoustic_app"
+
+[dependencies]
+hdk = { workspace = true }
+serde = { workspace = true }
+holochain_serialized_bytes = { workspace = true }
+acoustic_app_integrity = { workspace = true }

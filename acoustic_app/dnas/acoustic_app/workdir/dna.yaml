@@ -1,0 +1,19 @@
+manifest_version: '1'
+name: acoustic_app
+integrity:
+  network_seed: null
+  properties: null
+  zomes:
+  - name: acoustic_app_integrity
+    hash: null
+    bundled: ../../../target/wasm32-unknown-unknown/release/acoustic_app_integrity.wasm
+    dependencies: null
+    dylib: null
+coordinator:
+  zomes:
+  - name: acoustic_app
+    hash: null
+    bundled: ../../../target/wasm32-unknown-unknown/release/acoustic_app.wasm
+    dependencies:
+    - name: acoustic_app_integrity
+    dylib: null
