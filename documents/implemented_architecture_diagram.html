@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DART: Implemented System Architecture & Pipeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #ffffff;
+            color: #212121;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #0d47a1;
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
+        .header p {
+            color: #546e7a;
+            font-size: 15px;
+            margin: 0;
+        }
+        .actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .btn {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+        }
+        .btn-png { background-color: #0277bd; }
+        .btn-svg { background-color: #2e7d32; }
+        .btn-doc { background-color: #5c6bc0; }
+        .diagram-card {
+            background-color: #ffffff;
+            border: 1px solid #cfd8dc;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            padding: 40px 30px;
+            max-width: 1350px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .mermaid {
+            width: 100%;
+            background-color: #ffffff;
+        }
+        /* Comprehensive text-clipping & descender protection */
+        .mermaid .label foreignObject {
+            overflow: visible !important;
+        }
+        .mermaid .label foreignObject div {
+            padding: 6px 12px !important;
+            line-height: 1.5 !important;
+            text-align: center !important;
+        }
+        .mermaid svg {
+            overflow: visible !important;
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>DART: Implemented System Architecture & Pipeline</h1>
+        <p>Execution order, component inputs/outputs, TinyML quantization, and Holochain physical consensus</p>
+        <div class="actions">
+            <a href="implemented_architecture_diagram.png" download="dart_implemented_architecture.png" class="btn btn-png">
+                📥 Download PNG Image
+            </a>
+            <a href="implemented_architecture_diagram.svg" download="dart_implemented_architecture.svg" class="btn btn-svg">
+                📥 Download Vector SVG
+            </a>
+            <a href="IMPLEMENTED_ARCHITECTURE.md" class="btn btn-doc">
+                📖 View Full Documentation
+            </a>
+        </div>
+    </div>
+
+    <div class="diagram-card">
+        <div class="mermaid">
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'darkMode': false,
+    'background': '#ffffff',
+    'mainBkg': '#ffffff',
+    'lineColor': '#263238',
+    'textColor': '#1a237e',
+    'fontSize': '13px',
+    'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+  },
+  'flowchart': {
+    'htmlLabels': true,
+    'curve': 'basis',
+    'nodeSpacing': 45,
+    'rankSpacing': 55,
+    'padding': 25
+  }
+}}%%
+flowchart TD
+    %% Styling Classes
+    classDef stage1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#0d47a1;
+    classDef stage2 fill:#ede7f6,stroke:#512da8,stroke-width:2px,color:#311b92;
+    classDef stage3 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef stage4 fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#bf360c;
+    classDef artifact fill:#ffffff,stroke:#37474f,stroke-width:1.5px,color:#263238;
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#f57f17;
+
+    %% STAGE 1: DATA PREPARATION & FEATURE EXTRACTION
+    subgraph STAGE1["Stage 1: Dataset Verification & Feature Engineering (Offline Pipeline)"]
+        VERIFY["&nbsp;<br/><b>File 1.1: verify_dataset.py</b><br/>Pre-Flight Integrity Check<br/>Checks 8,732 UrbanSound8K slices & class distribution<br/>&nbsp;"]:::stage1
+        
+        EXTRACT["&nbsp;<br/><b>File 1.2: extract_features.py</b><br/>Runs 1st (Core Preprocessing)<br/>• Slices custom audio to 4.0s (stride 2.0s)<br/>• Within-fold 1:1 balanced sampling<br/>• STFT + 128 Mel bands + Log dB compression<br/>&nbsp;"]:::stage1
+        
+        VERIFY -->|"Dataset Verified"| EXTRACT
+
+        X_OUT[("&nbsp;<br/><b>X_features.npy</b><br/>Shape: (2066, 128, 126)<br/>Dtype: float32 (133.2 MB)<br/>&nbsp;")]:::artifact
+        Y_OUT[("&nbsp;<br/><b>y_labels.npy</b><br/>Shape: (2066,)<br/>Binary: 1=Gunshot, 0=Noise<br/>&nbsp;")]:::artifact
+        FOLD_OUT[("&nbsp;<br/><b>fold_assignments.npy</b><br/>Shape: (2066,)<br/>10-Fold CV IDs [1..10]<br/>&nbsp;")]:::artifact
+
+        EXTRACT --> X_OUT
+        EXTRACT --> Y_OUT
+        EXTRACT --> FOLD_OUT
+    end
+
+    %% STAGE 2: MODEL TRAINING & QUANTIZATION
+    subgraph STAGE2["Stage 2: Model Training, Quantization & TinyML Export"]
+        TRAIN["&nbsp;<br/><b>File 2.1: train_model.py</b><br/>Runs 2nd (Deep Learning Engine)<br/>• SpecAugment: Time/Freq masking + Gaussian noise<br/>• Z-Score Feature Standardization across 16,128 features<br/>• Conv2D + Dual 1D Temporal Pooling Architecture<br/>• 10-Fold Cross-Validation evaluation<br/>• Full-Integer INT8 Post-Training Quantization (PTQ)<br/>&nbsp;"]:::stage2
+
+        X_OUT --> TRAIN
+        Y_OUT --> TRAIN
+        FOLD_OUT --> TRAIN
+
+        MEAN_OUT[("&nbsp;<br/><b>mean.npy</b><br/>Shape: (16128,)<br/>Global Feature Mean<br/>&nbsp;")]:::artifact
+        STD_OUT[("&nbsp;<br/><b>std.npy</b><br/>Shape: (16128,)<br/>Global Feature Std Dev<br/>&nbsp;")]:::artifact
+        TFLITE_OUT[("&nbsp;<br/><b>gunshot_detector.tflite</b><br/>INT8 Quantized Model<br/>Size: 44.0 KB (Zero-Float Ops)<br/>&nbsp;")]:::artifact
+
+        TRAIN --> MEAN_OUT
+        TRAIN --> STD_OUT
+        TRAIN --> TFLITE_OUT
+    end
+
+    %% STAGE 3: REAL-TIME EDGE LISTENER
+    subgraph STAGE3["Stage 3: Real-Time Edge Audio Listener & Detection"]
+        LISTENER["&nbsp;<br/><b>File 3.1: app/gunshot_listener.py</b><br/>Runs 3rd (Real-Time Edge Daemon)<br/>• Continuous 16 kHz sampling via sounddevice<br/>• Volatile 4.0s circular RAM ring buffer (deque)<br/>&nbsp;"]:::stage3
+
+        RMS_CHECK{"&nbsp;<br/><b>RMS Wake-Up Gate</b><br/>RMS Energy > 0.015?<br/>(Evaluated every 10ms)<br/>&nbsp;"}:::decision
+
+        LISTENER --> RMS_CHECK
+        RMS_CHECK -- "No (Ambient Chatter)" --> SLEEP["&nbsp;<br/>Sleep 10ms & Overwrite Buffer<br/>(Citizen Privacy Preserved)<br/>&nbsp;"]:::stage3
+        SLEEP --> LISTENER
+
+        RMS_CHECK -- "Yes (Acoustic Spike)" --> FREEZE["&nbsp;<br/>Freeze 4.0s Buffer Snapshot<br/>Capture arrival timestamp (t_arrival)<br/>&nbsp;"]:::stage3
+
+        TFLITE_INFER["&nbsp;<br/><b>On-Device INT8 Inference</b><br/>• Compute Log-Mel Spectrogram (128x126)<br/>• Normalize: (features - mean) / std<br/>• Quantize: round(features / scale) + zero_point<br/>• Invoke TFLite Interpreter (~35-45ms)<br/>&nbsp;"]:::stage3
+
+        FREEZE --> TFLITE_INFER
+        MEAN_OUT -.-> TFLITE_INFER
+        STD_OUT -.-> TFLITE_INFER
+        TFLITE_OUT -.-> TFLITE_INFER
+
+        CONF_CHECK{"&nbsp;<br/><b>Confidence Gate</b><br/>Prediction >= 0.75?<br/>&nbsp;"}:::decision
+
+        TFLITE_INFER --> CONF_CHECK
+        CONF_CHECK -- "No (< 0.75)" --> DROP["&nbsp;<br/>Log: Background Ambient Sound<br/>Resume Listening<br/>&nbsp;"]:::stage3
+        DROP --> LISTENER
+
+        CONF_CHECK -- "Yes (>= 0.75)" --> ALERT["&nbsp;<br/><b>GUNSHOT CONFIRMED</b><br/>Construct Zome Payload<br/>Spawn Asynchronous WebSocket Thread<br/>&nbsp;"]:::stage3
+
+        TEST_RUN["&nbsp;<br/><b>File 3.2: app/gunshot_listener_test.py</b><br/>Offline Validation on 30 Unseen Samples<br/>Output: 80.0% Accuracy, 76.9% Precision/Recall<br/>&nbsp;"]:::stage3
+        TFLITE_OUT -.-> TEST_RUN
+    end
+
+    %% STAGE 4: HOLOCHAIN DECENTRALIZED DHT
+    subgraph STAGE4["Stage 4: Holochain Decentralized Consensus & Anti-Spoofing"]
+        WS_CALL["&nbsp;<br/><b>WebSocket JSON-RPC Call</b><br/>Port: ws://127.0.0.1:8888<br/>Payload: 3x Sensor Observations {x, y, t}<br/>&nbsp;"]:::stage4
+
+        ALERT --> WS_CALL
+
+        INTEGRITY["&nbsp;<br/><b>File 4.1: zomes/integrity/lib.rs</b><br/>Deterministic Rust WASM Physical Rules<br/>• len(observations) >= 3<br/>• Coordinate sanity: is_finite() (!NaN/!Inf)<br/>• Physical Causality: |t_i - t_j| <= (d_ij / 343) + 50ms<br/>&nbsp;"]:::stage4
+
+        WS_CALL --> INTEGRITY
+
+        VALID_CHECK{"&nbsp;<br/><b>Physical Rules Pass?</b><br/>Speed of Sound Validated?<br/>&nbsp;"}:::decision
+
+        INTEGRITY --> VALID_CHECK
+        VALID_CHECK -- "Violated" --> REJECT["&nbsp;<br/><b>Reject Claim</b><br/>Drop Fake/Spoofed Alert<br/>&nbsp;"]:::stage4
+
+        COORDINATOR["&nbsp;<br/><b>File 4.2: zomes/coordinator/lib.rs</b><br/>• Commit to local source chain<br/>• Link to 'all_claims' DHT anchor<br/>• Gossip to peer nodes<br/>&nbsp;"]:::stage4
+
+        VALID_CHECK -- "Validated" --> COORDINATOR
+
+        DHT_ENTRY[("&nbsp;<br/><b>Immutable DHT Entry</b><br/>ActionHash: [39-byte Blake2b Hash]<br/>Evidentiary Record Created<br/>&nbsp;")]:::artifact
+
+        COORDINATOR --> DHT_ENTRY
+    end
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                darkMode: false,
+                background: '#ffffff',
+                mainBkg: '#ffffff',
+                lineColor: '#263238',
+                textColor: '#1a237e',
+                fontSize: '13px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+            },
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis',
+                nodeSpacing: 45,
+                rankSpacing: 55,
+                padding: 25
+            }
+        });
+    </script>
+</body>
+</html>

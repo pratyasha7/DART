@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DART: Implemented Machine Learning & TinyML Pipeline</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #ffffff;
+            color: #212121;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #0d47a1;
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
+        .header p {
+            color: #546e7a;
+            font-size: 15px;
+            margin: 0;
+        }
+        .actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .btn {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+        }
+        .btn-png { background-color: #0277bd; }
+        .btn-svg { background-color: #2e7d32; }
+        .btn-doc { background-color: #5c6bc0; }
+        .diagram-card {
+            background-color: #ffffff;
+            border: 1px solid #cfd8dc;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            padding: 40px 30px;
+            max-width: 1350px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .mermaid {
+            width: 100%;
+            background-color: #ffffff;
+        }
+        /* Comprehensive text-clipping & descender protection */
+        .mermaid .label foreignObject {
+            overflow: visible !important;
+        }
+        .mermaid .label foreignObject div {
+            padding: 6px 12px !important;
+            line-height: 1.5 !important;
+            text-align: center !important;
+        }
+        .mermaid svg {
+            overflow: visible !important;
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>DART: Implemented Machine Learning & TinyML Pipeline</h1>
+        <p>A clean, focused architecture: Raw Audio &rarr; Log-Mel STFT &rarr; SpecAugment &rarr; Dual-Pooling CNN &rarr; INT8 PTQ &rarr; Edge Decision</p>
+        <div class="actions">
+            <a href="ml_pipeline_diagram.png" download="dart_ml_pipeline.png" class="btn btn-png">
+                📥 Download PNG Image
+            </a>
+            <a href="ml_pipeline_diagram.svg" download="dart_ml_pipeline.svg" class="btn btn-svg">
+                📥 Download Vector SVG
+            </a>
+            <a href="MACHINE_LEARNING_PIPELINE.md" class="btn btn-doc">
+                📖 View Deep ML Documentation
+            </a>
+        </div>
+    </div>
+
+    <div class="diagram-card">
+        <div class="mermaid">
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'darkMode': false,
+    'background': '#ffffff',
+    'mainBkg': '#ffffff',
+    'lineColor': '#263238',
+    'textColor': '#1a237e',
+    'fontSize': '13px',
+    'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+  },
+  'flowchart': {
+    'htmlLabels': true,
+    'curve': 'basis',
+    'nodeSpacing': 40,
+    'rankSpacing': 50,
+    'padding': 25
+  }
+}}%%
+flowchart TD
+    %% Styling Classes
+    classDef step1 fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b;
+    classDef step2 fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#1b5e20;
+    classDef step3 fill:#fff8e1,stroke:#ffa000,stroke-width:2px,color:#ff6f00;
+    classDef step4 fill:#ede7f6,stroke:#512da8,stroke-width:2px,color:#311b92;
+    classDef step5 fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#880e4f;
+    classDef step6 fill:#e0f2f1,stroke:#00796b,stroke-width:2px,color:#004d40;
+    classDef subNode fill:#ffffff,stroke:#455a64,stroke-width:1.5px,color:#263238;
+
+    %% 1. Raw Audio Stage
+    subgraph S1["1. Raw Acoustic Capture & Slicing"]
+        AUDIO["&nbsp;<br/><b>Raw Audio Stream</b><br/>4.0s @ 16 kHz Mono (64,000 samples)<br/>&nbsp;"]:::step1
+        SLICING["&nbsp;<br/><b>Sliding Window Slicer</b><br/>Window = 4.0s | Stride = 2.0s<br/>&nbsp;"]:::subNode
+        AUDIO --> SLICING
+    end
+
+    %% 2. Time-Frequency Representation
+    subgraph S2["2. Time-Frequency Feature Extraction"]
+        STFT["&nbsp;<br/><b>Short-Time Fourier Transform (STFT)</b><br/>N_fft = 1024 (64ms) | Hop = 512 (32ms) | Hann Window<br/>&nbsp;"]:::step2
+        MEL["&nbsp;<br/><b>128-Band Mel Filterbank & Log dB</b><br/>0 Hz - 8,000 Hz &rarr; Log Decibel Compression: 10*log10(S/1.0)<br/>&nbsp;"]:::step2
+        SPEC_OUT[("&nbsp;<br/><b>Log-Mel Spectrogram Matrix</b><br/>Shape: (128 Mel bands &times; 126 Time frames) = 16,128 features<br/>&nbsp;")]:::subNode
+        SLICING --> STFT --> MEL --> SPEC_OUT
+    end
+
+    %% 3. Data Augmentation & Normalization
+    subgraph S3["3. Regularization & Normalization"]
+        AUG["&nbsp;<br/><b>SpecAugment (On-the-Fly)</b><br/>Time Masking (t&le;15) + Freq Masking (f&le;15) + Gaussian Jitter N(0, 0.05)<br/>&nbsp;"]:::step3
+        NORM["&nbsp;<br/><b>Z-Score Standardization</b><br/>x_norm = (x - mean) / std across all 16,128 features<br/>&nbsp;"]:::step3
+        SPEC_OUT --> AUG --> NORM
+    end
+
+    %% 4. Neural Network Architecture
+    subgraph S4["4. Deep Dual-Pooling CNN Architecture"]
+        RESHAPE["&nbsp;<br/><b>Reshape Layer</b><br/>Input (16128,) &rarr; (126 Time &times; 128 Freq &times; 1 Channel)<br/>&nbsp;"]:::subNode
+        CONV1["&nbsp;<br/><b>Conv Block 1</b><br/>Conv2D(8 filters, 3x3) + BatchNorm + MaxPool(2x2) &rarr; (63, 64, 8)<br/>&nbsp;"]:::step4
+        CONV2["&nbsp;<br/><b>Conv Block 2</b><br/>Conv2D(16 filters, 3x3) + BatchNorm + MaxPool(2x2) &rarr; (31, 32, 16)<br/>&nbsp;"]:::step4
+        DUAL_POOL["&nbsp;<br/><b>Dual 1D Temporal Pooling (The Core Innovation)</b><br/>Reshape to (31, 512) &rarr; Concatenate[GlobalMax1D &oplus; GlobalAvg1D] &rarr; (1024,)<br/><i>Simultaneously captures explosive blast peak and reverberant decay</i><br/>&nbsp;"]:::step4
+        DENSE_HEAD["&nbsp;<br/><b>Classification Head</b><br/>Dense(32, ReLU) + Dropout(0.3) &rarr; Dense(1, Sigmoid)<br/>&nbsp;"]:::subNode
+
+        NORM --> RESHAPE --> CONV1 --> CONV2 --> DUAL_POOL --> DENSE_HEAD
+    end
+
+    %% 5. Quantization & Export
+    subgraph S5["5. INT8 Post-Training Quantization (PTQ)"]
+        QUANT["&nbsp;<br/><b>Full-Integer INT8 Quantizer</b><br/>Calibrated with 200 representative samples<br/>Weights & Activations mapped from float32 to int8 [-128, 127]<br/>&nbsp;"]:::step5
+        MODEL_OUT[("&nbsp;<br/><b>gunshot_detector.tflite (44.0 KB)</b><br/>15.9x compression | Zero floating-point operations<br/>&nbsp;")]:::subNode
+        DENSE_HEAD --> QUANT --> MODEL_OUT
+    end
+
+    %% 6. Edge Decision Engine
+    subgraph S6["6. Real-Time Edge Decision Engine"]
+        RMS["&nbsp;<br/><b>RMS Wake-Up Filter</b><br/>RMS > 0.015 over 100ms window<br/>(Keeps chip asleep during ambient quiet)<br/>&nbsp;"]:::step6
+        INFER["&nbsp;<br/><b>On-Device TFLite Invocation</b><br/>Execution latency: ~35-45ms<br/>&nbsp;"]:::step6
+        DECIDE{"&nbsp;<br/><b>Confidence &ge; 0.75?</b><br/>&nbsp;"}:::subNode
+        CONFIRMED["&nbsp;<br/><b>GUNSHOT CONFIRMED (P &ge; 75%)</b><br/>Trigger Holochain P2P WebSocket Alert<br/>&nbsp;"]:::step6
+        IGNORED["&nbsp;<br/><b>Ambient Noise Dropped (P < 75%)</b><br/>Resume Listening Loop<br/>&nbsp;"]:::subNode
+
+        MODEL_OUT -.-> INFER
+        RMS -- "Acoustic Spike" --> INFER --> DECIDE
+        DECIDE -- "Yes" --> CONFIRMED
+        DECIDE -- "No" --> IGNORED
+    end
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                darkMode: false,
+                background: '#ffffff',
+                mainBkg : '#ffffff',
+                lineColor: '#263238',
+                textColor: '#1a237e',
+                fontSize : '13px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+            },
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis',
+                nodeSpacing: 40,
+                rankSpacing: 50,
+                padding: 25
+            }
+        });
+    </script>
+</body>
+</html>

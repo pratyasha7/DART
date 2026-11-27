@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DART: Simplified 5-Step Architecture Flowchart</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #ffffff;
+            color: #263238;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #0d47a1;
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
+        .header p {
+            color: #546e7a;
+            font-size: 15px;
+            margin: 0;
+        }
+        .actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .btn {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+        }
+        .btn-png { background-color: #0277bd; }
+        .btn-svg { background-color: #2e7d32; }
+        .btn-detailed { background-color: #7b1fa2; }
+        .diagram-card {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            padding: 40px 30px;
+            max-width: 1350px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .mermaid {
+            width: 100%;
+            background-color: #ffffff;
+        }
+        .mermaid .label foreignObject {
+            overflow: visible !important;
+        }
+        .mermaid .label foreignObject div {
+            padding: 8px 12px !important;
+            line-height: 1.5 !important;
+            text-align: center !important;
+        }
+        .mermaid svg {
+            overflow: visible !important;
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>DART: Simplified 5-Step System Architecture</h1>
+        <p>A clean, human-readable overview of edge acoustic detection, decentralized verification, and emergency dispatch.</p>
+        <div class="actions">
+            <a href="simple_architecture_diagram.png" download="dart_simple_architecture.png" class="btn btn-png">
+                📥 Download Simple PNG Image
+            </a>
+            <a href="simple_architecture_diagram.svg" download="dart_simple_architecture.svg" class="btn btn-svg">
+                📥 Download Vector SVG
+            </a>
+            <a href="proposed_architecture_diagram.html" class="btn btn-detailed">
+                🔬 View Full Technical Blueprint
+            </a>
+        </div>
+    </div>
+
+    <div class="diagram-card">
+        <div class="mermaid">
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'darkMode': false,
+    'background': '#ffffff',
+    'mainBkg': '#ffffff',
+    'lineColor': '#37474f',
+    'textColor': '#263238',
+    'fontSize': '14px',
+    'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+  },
+  'flowchart': {
+    'htmlLabels': true,
+    'curve': 'basis',
+    'nodeSpacing': 35,
+    'rankSpacing': 40,
+    'padding': 25
+  }
+}}%%
+flowchart LR
+    classDef eventStep fill:#ffebee,stroke:#e53935,stroke-width:2px,color:#b71c1c;
+    classDef edgeStep fill:#e1f5fe,stroke:#0288d1,stroke-width:2px,color:#01579b;
+    classDef fogStep fill:#e8f5e9,stroke:#43a047,stroke-width:2px,color:#1b5e20;
+    classDef dhtStep fill:#fff3e0,stroke:#fb8c00,stroke-width:2px,color:#e65100;
+    classDef cadStep fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#4a148c;
+
+    EVENT["&nbsp;<br/>💥 <b>1. Gunshot Fired</b><br/><b>Acoustic Wave Expands</b><br/>Supersonic shockwave & blast<br/>travel at 343 m/s<br/>&nbsp;"]:::eventStep
+
+    EDGE["&nbsp;<br/>🎙️ <b>2. Streetlamp Sensors</b><br/><b>Privacy-Safe TinyML</b><br/>• Temporary 4s memory (RAM only)<br/>• 44 KB AI detects gunshot in 40ms<br/>&nbsp;"]:::edgeStep
+
+    FOG["&nbsp;<br/>📦 <b>3. Utility Box Hub</b><br/><b>Cluster Triangulation</b><br/>• Collects 3+ sensor timestamps<br/>• Solves hyperbolic TDoA for (X, Y)<br/>&nbsp;"]:::fogStep
+
+    DHT["&nbsp;<br/>🔗 <b>4. Holochain P2P Mesh</b><br/><b>Physics-Based Consensus</b><br/>• Enforces speed-of-sound limits<br/>• Rejects spoofed or fake alerts<br/>&nbsp;"]:::dhtStep
+
+    CAD["&nbsp;<br/>🚓 <b>5. 911 CAD Dispatch</b><br/><b>Tactical Response</b><br/>• Pinpoints shooter on police map<br/>• Alert delivered in under 1 second<br/>&nbsp;"]:::cadStep
+
+    EVENT -->|"Sound waves"| EDGE
+    EDGE -->|"Wireless telemetry"| FOG
+    FOG -->|"P2P gossip"| DHT
+    DHT -->|"Real-time WebSocket"| CAD
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                darkMode: false,
+                background: '#ffffff',
+                mainBkg: '#ffffff',
+                lineColor: '#37474f',
+                textColor: '#263238',
+                fontSize: '14px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+            },
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis',
+                nodeSpacing: 35,
+                rankSpacing: 40,
+                padding: 25
+            }
+        });
+    </script>
+</body>
+</html>

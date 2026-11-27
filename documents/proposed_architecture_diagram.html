@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DART: Proposed System Architecture (Full Technical Blueprint)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 40px 20px;
+            background-color: #ffffff;
+            color: #212121;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .header {
+            max-width: 1200px;
+            width: 100%;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #0d47a1;
+            margin-bottom: 8px;
+            font-size: 26px;
+        }
+        .header p {
+            color: #546e7a;
+            font-size: 15px;
+            margin: 0;
+        }
+        .actions {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .btn {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.12);
+        }
+        .btn-png { background-color: #0277bd; }
+        .btn-svg { background-color: #2e7d32; }
+        .btn-simple { background-color: #5c6bc0; }
+        .diagram-card {
+            background-color: #ffffff;
+            border: 1px solid #cfd8dc;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            padding: 40px 30px;
+            max-width: 1350px;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            overflow-x: auto;
+        }
+        .mermaid {
+            width: 100%;
+            background-color: #ffffff;
+        }
+        /* Comprehensive text-clipping & descender protection */
+        .mermaid .label foreignObject {
+            overflow: visible !important;
+        }
+        .mermaid .label foreignObject div {
+            padding: 6px 12px !important;
+            line-height: 1.5 !important;
+            text-align: center !important;
+        }
+        .mermaid svg {
+            overflow: visible !important;
+            max-width: 100% !important;
+            height: auto !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>DART: Decentralized Acoustic Reconnaissance & Triangulation</h1>
+        <p>Complete Four-Tier Edge-to-Fog-to-DHT Architecture (Physical Source &rarr; TinyML &rarr; Holochain &rarr; 911 CAD)</p>
+        <div class="actions">
+            <a href="proposed_architecture_diagram.png" download="dart_proposed_architecture.png" class="btn btn-png">
+                📥 Download Detailed PNG
+            </a>
+            <a href="proposed_architecture_diagram.svg" download="dart_proposed_architecture.svg" class="btn btn-svg">
+                📥 Download Detailed SVG
+            </a>
+            <a href="simple_architecture_diagram.html" class="btn btn-simple">
+                🔍 View Simple 5-Step Overview
+            </a>
+        </div>
+    </div>
+
+    <div class="diagram-card">
+        <div class="mermaid">
+%%{init: {
+  'theme': 'base',
+  'themeVariables': {
+    'darkMode': false,
+    'background': '#ffffff',
+    'mainBkg': '#ffffff',
+    'lineColor': '#263238',
+    'textColor': '#1a237e',
+    'fontSize': '13px',
+    'fontFamily': '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+  },
+  'flowchart': {
+    'htmlLabels': true,
+    'curve': 'basis',
+    'nodeSpacing': 50,
+    'rankSpacing': 60,
+    'padding': 30
+  }
+}}%%
+flowchart TD
+    %% Styling definitions
+    classDef physicalEvent fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#b71c1c;
+    classDef edgeTier fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:#01579b;
+    classDef fogTier fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#1b5e20;
+    classDef dhtTier fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:#e65100;
+    classDef cadTier fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#4a148c;
+    classDef subNode fill:#ffffff,stroke:#0288d1,stroke-width:1.5px,color:#01579b;
+
+    %% Physical Acoustic Source
+    GUNSHOT["&nbsp;<br/><b>Acoustic Discharge Event</b><br/>Supersonic Shockwave & Muzzle Blast (343 m/s)<br/>&nbsp;"]:::physicalEvent
+
+    %% Tier 1: Streetlamp Edge Nodes
+    subgraph TIER1["Tier 1: Streetlamp Edge Nodes (Volatile RAM & TinyML)"]
+        subgraph NODE_A["Streetlamp Node A (Arduino Nano 33 BLE Sense)"]
+            MIC_A["&nbsp;<br/><b>PDM Mic</b><br/>(16 kHz Sampling)<br/>&nbsp;"]:::subNode --> BUF_A["&nbsp;<br/><b>Volatile 4.0s Ring Buffer</b><br/>(64k samples in RAM)<br/>&nbsp;"]:::subNode
+            BUF_A --> RMS_A{"&nbsp;<br/>RMS > 0.015?<br/>&nbsp;"}:::subNode
+            RMS_A -- "Yes (Spike)" --> MEL_A["&nbsp;<br/><b>STFT & Log-Mel</b><br/>(128x126 matrix)<br/>&nbsp;"]:::subNode
+            MEL_A --> CNN_A["&nbsp;&nbsp;<b>TinyML INT8 CNN</b>&nbsp;&nbsp;<br/>&nbsp;&nbsp;(44 KB Quantized Model)&nbsp;&nbsp;"]:::subNode
+            CNN_A --> CONF_A{"&nbsp;<br/>Score &ge; 0.75?<br/>&nbsp;"}:::subNode
+            CONF_A -- "Confirmed" --> PKT_A["&nbsp;<br/><b>Signed Observation Packet A</b><br/>(Timestamp, Geo, Signature)<br/>&nbsp;"]:::subNode
+        end
+
+        subgraph NODE_B["Streetlamp Node B (Arduino Nano 33 BLE Sense)"]
+            MIC_B["&nbsp;<br/><b>PDM Mic</b><br/>(16 kHz Sampling)<br/>&nbsp;"]:::subNode --> BUF_B["&nbsp;<br/><b>Volatile 4.0s Ring Buffer</b><br/>(64k samples in RAM)<br/>&nbsp;"]:::subNode
+            BUF_B --> RMS_B{"&nbsp;<br/>RMS > 0.015?<br/>&nbsp;"}:::subNode
+            RMS_B -- "Yes" --> CNN_B["&nbsp;&nbsp;<b>TinyML INT8 CNN</b>&nbsp;&nbsp;<br/>&nbsp;&nbsp;(44 KB Quantized Model)&nbsp;&nbsp;"]:::subNode
+            CNN_B --> PKT_B["&nbsp;<br/><b>Signed Observation Packet B</b><br/>(Timestamp, Geo, Signature)<br/>&nbsp;"]:::subNode
+        end
+
+        subgraph NODE_C["Streetlamp Node C (ESP32-S3 / Edge Node)"]
+            MIC_C["&nbsp;<br/><b>PDM Mic</b><br/>(16 kHz Sampling)<br/>&nbsp;"]:::subNode --> BUF_C["&nbsp;<br/><b>Volatile 4.0s Ring Buffer</b><br/>(64k samples in RAM)<br/>&nbsp;"]:::subNode
+            BUF_C --> RMS_C{"&nbsp;<br/>RMS > 0.015?<br/>&nbsp;"}:::subNode
+            RMS_C -- "Yes" --> CNN_C["&nbsp;&nbsp;<b>TinyML INT8 CNN</b>&nbsp;&nbsp;<br/>&nbsp;&nbsp;(44 KB Quantized Model)&nbsp;&nbsp;"]:::subNode
+            CNN_C --> PKT_C["&nbsp;<br/><b>Signed Observation Packet C</b><br/>(Timestamp, Geo, Signature)<br/>&nbsp;"]:::subNode
+        end
+    end
+
+    GUNSHOT -. "Sound Wavefront (Speed: 343 m/s)" .-> MIC_A
+    GUNSHOT -. "Sound Wavefront (Speed: 343 m/s)" .-> MIC_B
+    GUNSHOT -. "Sound Wavefront (Speed: 343 m/s)" .-> MIC_C
+
+    %% Tier 2: Municipal Fog Gateway
+    subgraph TIER2["Tier 2: Municipal Fog Gateway (Utility Box - Raspberry Pi 4 / CM4)"]
+        RX["&nbsp;<br/><b>Encrypted Wireless Ingestion</b><br/>(BLE 5.0 Long Range / LoRaWAN)<br/>&nbsp;"]:::fogTier
+        COINC{"&nbsp;<br/><b>Coincidence Check</b><br/>&Delta;t &lt; 1.5s across 3+ nodes<br/>&nbsp;"}:::fogTier
+        BUNDLE["&nbsp;<br/><b>Cluster Claim Bundler</b><br/>(Requires &ge; 3 Distinct Sensors)<br/>&nbsp;"]:::fogTier
+        TDOA_SOLVE["&nbsp;<br/><b>Hyperbolic TDoA Multilateration</b><br/>Initial (X, Y) Coordinate Solver<br/>&nbsp;"]:::fogTier
+        CONDUCTOR["&nbsp;<br/><b>Local Holochain Conductor</b><br/>(Peer Validator Node)<br/>&nbsp;"]:::fogTier
+
+        RX --> COINC
+        COINC -- "Count >= 3" --> BUNDLE
+        BUNDLE --> TDOA_SOLVE
+        TDOA_SOLVE --> CONDUCTOR
+    end
+
+    PKT_A --> RX
+    PKT_B --> RX
+    PKT_C --> RX
+
+    %% Tier 3: Holochain Decentralized P2P Ledger
+    subgraph TIER3["Tier 3: Holochain Decentralized P2P Ledger & Validation Mesh"]
+        GOSSIP["&nbsp;<br/><b>Peer-to-Peer Network Gossip</b><br/>(WebRTC / Kitsune2 Protocol)<br/>&nbsp;"]:::dhtTier
+        VALIDATOR{"&nbsp;<br/><b>Deterministic WASM Validator</b><br/>(Physical Rule Engine HDI 0.6.x)<br/>&nbsp;"}:::dhtTier
+        CHECK_STRUCT["&nbsp;<br/>1. Structure: len(observations) &ge; 3<br/>&nbsp;"]:::dhtTier
+        CHECK_FINITE["&nbsp;<br/>2. Geometry: Coordinates Finite (!NaN && !Inf)<br/>&nbsp;"]:::dhtTier
+        CHECK_PHYSICS["&nbsp;<br/>3. Causality: |t_i - t_j| &le; (d_ij / 343.0) + 50ms<br/>&nbsp;"]:::dhtTier
+        DHT_COMMIT[("&nbsp;<br/><b>Immutable Distributed Hash Table (DHT)</b><br/>Anchor Index: 'all_claims'<br/>&nbsp;")]:::dhtTier
+
+        CONDUCTOR --> GOSSIP
+        GOSSIP --> VALIDATOR
+        VALIDATOR --> CHECK_STRUCT --> CHECK_FINITE --> CHECK_PHYSICS
+        CHECK_PHYSICS -- "Physically Validated" --> DHT_COMMIT
+        CHECK_PHYSICS -- "Speed of Sound Violated" --> REJECT["&nbsp;<br/><b>Reject Claim</b><br/>Drop Spoofed or Non-Physical Entry<br/>&nbsp;"]:::physicalEvent
+    end
+
+    %% Tier 4: Municipal Dispatch & Tactical Response
+    subgraph TIER4["Tier 4: Municipal CAD & Tactical Responder UI"]
+        WS_EVENT["&nbsp;<br/><b>Secure WebSocket Dispatch</b><br/>(Real-Time JSON Stream)<br/>&nbsp;"]:::cadTier
+        TAPI["&nbsp;<br/><b>TAPI Threat Prioritization</b><br/>Automatic Fire Analysis & Caliber Est.<br/>&nbsp;"]:::cadTier
+        CAD_MAP["&nbsp;<br/><b>911 CAD Interactive Map</b><br/>Pinpoints Shooter & Perimeter Circle<br/>&nbsp;"]:::cadTier
+        MDT["&nbsp;<br/><b>Patrol Vehicle Mobile Terminal</b><br/>Turn-by-turn Navigation to (X, Y)<br/>&nbsp;"]:::cadTier
+
+        DHT_COMMIT --> WS_EVENT
+        WS_EVENT --> TAPI
+        TAPI --> CAD_MAP
+        CAD_MAP --> MDT
+    end
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'base',
+            themeVariables: {
+                darkMode: false,
+                background: '#ffffff',
+                mainBkg: '#ffffff',
+                lineColor: '#263238',
+                textColor: '#1a237e',
+                fontSize: '13px',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif'
+            },
+            flowchart: {
+                htmlLabels: true,
+                curve: 'basis',
+                nodeSpacing: 50,
+                rankSpacing: 60,
+                padding: 30
+            }
+        });
+    </script>
+</body>
+</html>
