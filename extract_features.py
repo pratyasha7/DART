@@ -1,139 +1,157 @@
 import os
+import glob
 import pandas as pd
 import numpy as np
 import librosa
 
-# Configuration
 CSV_PATH = os.path.join("UrbanSound8K", "metadata", "UrbanSound8K.csv")
 AUDIO_DIR = os.path.join("UrbanSound8K", "audio")
-TARGET_SR = 16000     # Target sample rate (16kHz)
-DURATION = 2.0        # Target audio duration in seconds
-N_MELS = 128          # UPGRADED: 128 Mel bands (Replaces N_MFCC = 13)
-EXPECTED_FRAMES = 63  # Standard time-frame count for 32,000 samples
 
-# Validate baseline files exist
+CUSTOM_GUNSHOTS_DIR = os.path.join("custom_data", "gunshots")
+CUSTOM_NEGATIVES_DIR = os.path.join("custom_data", "negatives")
+
+TARGET_SR = 16000     
+DURATION = 4.0       
+STRIDE = 2.0          
+N_MELS = 128          
+HOP_LENGTH = 512      
+EXPECTED_FRAMES = 126 
+
 if not os.path.exists(CSV_PATH):
     print(f"Error: Metadata file not found at {CSV_PATH}")
     exit(1)
 
-print("Loading metadata...")
-metadata = pd.read_csv(CSV_PATH)
+def audio_chunk_to_melspec(audio_chunk):
 
-# =====================================================================
-# 1. LEAKAGE-PROOF WITHIN-FOLD BALANCED SAMPLING
-# =====================================================================
+    total_samples = int(TARGET_SR * DURATION)
+    if len(audio_chunk) < total_samples:
+        audio_chunk = np.pad(audio_chunk, (0, total_samples - len(audio_chunk)), 'constant')
+    else:
+        audio_chunk = audio_chunk[:total_samples]
+        
+    melspec = librosa.feature.melspectrogram(
+        y=audio_chunk, sr=TARGET_SR, n_fft=1024, hop_length=HOP_LENGTH, n_mels=N_MELS
+    )
+    log_melspec = librosa.power_to_db(melspec, ref=1.0)
+
+    if log_melspec.shape[1] < EXPECTED_FRAMES:
+        pad_width = EXPECTED_FRAMES - log_melspec.shape[1]
+        log_melspec = np.pad(log_melspec, ((0, 0), (0, pad_width)), 'constant')
+    else:
+        log_melspec = log_melspec[:, :EXPECTED_FRAMES]
+        
+    return log_melspec
+
+print("Loading UrbanSound8K metadata...")
+metadata = pd.read_csv(CSV_PATH)
 print("Performing within-fold balanced sampling...")
 
 balanced_records = []
-
-# Loop through each of the 10 official, predefined folds
 for fold_id in range(1, 11):
     fold_subset = metadata[metadata['fold'] == fold_id]
     
-    # Isolate gunshots in this fold (Class ID 6)
     fold_gunshots = fold_subset[fold_subset['classID'] == 6].copy()
     fold_gunshots['label'] = 1
     n_gunshots = len(fold_gunshots)
     
-    # Isolate ambient city sounds in this fold (All other classes)
     fold_non_gunshots = fold_subset[fold_subset['classID'] != 6].copy()
-    
     if n_gunshots == 0:
         continue
         
-    # Sample matching counts of background sounds strictly from the SAME fold
     if len(fold_non_gunshots) >= n_gunshots:
         sampled_non_gunshots = fold_non_gunshots.sample(n=n_gunshots, random_state=42)
     else:
         sampled_non_gunshots = fold_non_gunshots
         
     sampled_non_gunshots['label'] = 0
-    
     balanced_records.append(fold_gunshots)
     balanced_records.append(sampled_non_gunshots)
 
-# Combine elements into a single metadata reference
 balanced_metadata = pd.concat(balanced_records).reset_index(drop=True)
-print(f"Dataset Balanced! Collected {len(balanced_metadata)} records across 10 folds.")
+print(f"UrbanSound8K Balanced! Collected {len(balanced_metadata)} records across 10 folds.")
 
-# =====================================================================
-# 2. FEATURE EXTRACTION: 128-BAND LOG-MEL SPECTROGRAM
-# =====================================================================
-def extract_log_mel_spectrogram(file_path):
-    """Loads file, normalizes samples to 2s, extracts 128-band Log-Mel Spectrogram."""
-    try:
-        # 1. Load audio resampled to target rate
-        audio, sr = librosa.load(file_path, sr=TARGET_SR, duration=DURATION)
-        
-        # Enforce exact waveform size (32,000 samples for 2.0s @ 16kHz)
-        total_samples = int(TARGET_SR * DURATION)
-        if len(audio) < total_samples:
-            audio = np.pad(audio, (0, total_samples - len(audio)), 'constant')
-        else:
-            audio = audio[:total_samples]
-            
-        # 2. Extract 128-band Mel Spectrogram
-        melspec = librosa.feature.melspectrogram(y=audio, sr=sr, n_mels=N_MELS)
-        
-        # 3. Convert power spectrogram to decibel units (Log-Mel) with static ref
-        log_melspec = librosa.power_to_db(melspec, ref=1.0)
-        
-        # 4. Enforce exact frame width (63 time columns)
-        if log_melspec.shape[1] < EXPECTED_FRAMES:
-            pad_width = EXPECTED_FRAMES - log_melspec.shape[1]
-            log_melspec = np.pad(log_melspec, ((0, 0), (0, pad_width)), 'constant')
-        elif log_melspec.shape[1] > EXPECTED_FRAMES:
-            log_melspec = log_melspec[:, :EXPECTED_FRAMES]
-            
-        return log_melspec
-    except Exception as e:
-        return None
-
-# =====================================================================
-# 3. ROBUST EXTRACTION LOOP & ERROR LOGGING
-# =====================================================================
 X_features = []
 y_labels = []
 folds = []
 failed_files = []
 
-print("\nStarting 128-band Log-Mel Spectrogram feature extraction loop...")
+print("\nStarting UrbanSound8K feature extraction...")
 for index, row in balanced_metadata.iterrows():
     file_path = os.path.join(AUDIO_DIR, f"fold{row['fold']}", row['slice_file_name'])
-    
-    log_melspec = extract_log_mel_spectrogram(file_path)
-    if log_melspec is not None:
-        X_features.append(log_melspec)
+    try:
+        audio, _ = librosa.load(file_path, sr=TARGET_SR, mono=True, duration=DURATION)
+        melspec = audio_chunk_to_melspec(audio)
+        X_features.append(melspec)
         y_labels.append(row['label'])
         folds.append(row['fold'])
-    else:
+    except Exception as e:
         failed_files.append((file_path, row['slice_file_name']))
         
-    if (index + 1) % 100 == 0:
-        print(f"Processed {index + 1}/{len(balanced_metadata)} files...")
+    if (index + 1) % 200 == 0:
+        print(f"Processed {index + 1}/{len(balanced_metadata)} UrbanSound8K files...")
 
-# Safe array conversion (Guaranteed homogeneous shapes)
+def load_custom_folder_with_slicing(folder_path, label):
+
+    if not os.path.exists(folder_path):
+        print(f"[*] Folder '{folder_path}' not found. Skipping.")
+        return
+
+    audio_extensions = ("*.wav", "*.ogg", "*.mp3", "*.flac")
+    files = []
+    for ext in audio_extensions:
+        files.extend(glob.glob(os.path.join(folder_path, ext)))
+
+    print(f"\n[*] Processing {len(files)} custom files from '{folder_path}' (Label: {label})...")
+    window_samples = int(TARGET_SR * DURATION)
+    stride_samples = int(TARGET_SR * STRIDE)
+
+    extracted_slices = 0
+    for i, fpath in enumerate(files):
+        try:
+            full_audio, _ = librosa.load(fpath, sr=TARGET_SR, mono=True)
+            audio_len = len(full_audio)
+
+            if audio_len <= window_samples:
+                chunks = [full_audio]
+            else:
+                chunks = []
+                start = 0
+                while start + window_samples <= audio_len:
+                    chunks.append(full_audio[start:start + window_samples])
+                    last_start = start
+                    start += stride_samples
+                if (last_start + window_samples) < audio_len:
+                    chunks.append(full_audio[audio_len - window_samples:audio_len])
+
+            for chunk in chunks:
+                melspec = audio_chunk_to_melspec(chunk)
+                X_features.append(melspec)
+                y_labels.append(label)
+                folds.append((extracted_slices % 10) + 1)  # Spread slices across all 10 folds
+                extracted_slices += 1
+        except Exception as e:
+            failed_files.append((fpath, os.path.basename(fpath)))
+            
+    print(f" -> Extracted {extracted_slices} total 4.0s slices from '{folder_path}'.")
+
+load_custom_folder_with_slicing(CUSTOM_GUNSHOTS_DIR, label=1)
+load_custom_folder_with_slicing(CUSTOM_NEGATIVES_DIR, label=0)
+
 X_data = np.array(X_features, dtype=np.float32)
 y_data = np.array(y_labels, dtype=np.int32)
 fold_data = np.array(folds, dtype=np.int32)
 
 print("\n==========================================")
-print("             EXTRACTION SUMMARY           ")
+print("              EXTRACTION SUMMARY           ")
 print("==========================================")
-print(f"Successful extractions: {len(X_data)}")
-print(f"Failed extractions:     {len(failed_files)}")
-print(f"Features matrix shape:  {X_data.shape} (Expected: [Samples, {N_MELS}, {EXPECTED_FRAMES}])")
+print(f"Total extracted samples:  {len(X_data)}")
+print(f" - Gunshot Samples (1):   {np.sum(y_data == 1)}")
+print(f" - Non-Gunshot Noise (0): {np.sum(y_data == 0)}")
+print(f"Failed extractions:       {len(failed_files)}")
+print(f"Features matrix shape:    {X_data.shape} (Expected: [Samples, {N_MELS}, {EXPECTED_FRAMES}])")
 print("==========================================")
 
-if len(failed_files) > 0:
-    print("\nWarning: The following files failed to process during extraction:")
-    for path, name in failed_files[:10]:
-        print(f" - {name} (Path: {path})")
-    if len(failed_files) > 10:
-        print(f" ... and {len(failed_files) - 10} more.")
-
-# Save updated binaries
 np.save("X_features.npy", X_data)
 np.save("y_labels.npy", y_data)
 np.save("fold_assignments.npy", fold_data)
-print("\nNumPy features (128 Log-Mel) saved successfully to workspace disk.")
+print("\nNumPy features saved successfully to workspace disk.")
