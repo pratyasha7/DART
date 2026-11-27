@@ -1,5 +1,60 @@
+# Python virtual environments
 venv/
+.venv/
+env/
+ENV/
+
+# Audio datasets & raw recordings (Exceeds GitHub 100MB limit)
 UrbanSound8K/
+custom_data/
+unseen test/
+unseen_test/
+*.wav
+*.mp3
+*.ogg
+*.flac
+
+# Rust & Holochain build artifacts
 target/
+**/target/
 .holochain/
+.hc
+.hc*
+*.dna
+*.happ
+*.webhapp
+
+# Node.js dependencies & logs
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Python cache & bytecode
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# Large training feature matrices (X_features.npy is 133MB - blocks GitHub)
 *.npy
+
+# Whitelist small runtime artifacts needed for gunshot_listener.py
+!mean.npy
+!std.npy
+
+# Environment variables & credentials
+.env
+.env.*
+!.env.example
+
+# IDE & OS Temporary files
+.vscode/
+.idea/
+~$*
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
