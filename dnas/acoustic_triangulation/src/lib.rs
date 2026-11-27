@@ -63,6 +63,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             ));
                         }
 
+                        // Ensure all coordinates and timestamps are finite numbers (prevents NaN comparison bypass)
+                        if !obs_a.x_coord.is_finite() || !obs_a.y_coord.is_finite() || !obs_a.t_arrival.is_finite()
+                            || !obs_b.x_coord.is_finite() || !obs_b.y_coord.is_finite() || !obs_b.t_arrival.is_finite() {
+                            return Ok(ValidateCallbackResult::Invalid(
+                                "Validation failed: Non-finite coordinate or timestamp detected.".to_string()
+                            ));
+                        }
+
                         // Calculate physical distance: d = sqrt((dx)^2 + (dy)^2)
                         let dx = obs_a.x_coord - obs_b.x_coord;
                         let dy = obs_a.y_coord - obs_b.y_coord;
