@@ -54,6 +54,8 @@ def run_int8_inference(audio_samples):
     try:
         # Scale only if signal exceeds full scale (> 1.0) to avoid boosting background noise
         peak_val = np.max(np.abs(audio_samples))
+        if peak_val < 1e-4:
+            return 0.0
         if peak_val > 1.0:
             audio_samples = audio_samples / peak_val
 

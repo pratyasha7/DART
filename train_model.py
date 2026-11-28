@@ -3,8 +3,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import Model
 from tensorflow.keras.layers import (
-    Input, Reshape, Conv2D, MaxPooling2D, Dense, Dropout, 
-    GlobalMaxPooling1D, GlobalAveragePooling1D, Concatenate, BatchNormalization
+    Input, Reshape, Conv2D, SeparableConv2D, MaxPooling2D, Dense, Dropout, 
+    GlobalAveragePooling2D, GlobalMaxPooling2D, Concatenate, BatchNormalization
 )
 
 print("Loading processed features from disk...")
@@ -52,18 +52,27 @@ def create_tinyml_model():
     inputs = Input(shape=(EXPECTED_FEATURES,))
     x = Reshape((EXPECTED_FRAMES, N_MELS, 1))(inputs)
     
+    # Block 1: Initial feature extraction
     x = Conv2D(8, kernel_size=(3, 3), padding='same', activation='relu')(x)
     x = BatchNormalization()(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
     
-    x = Conv2D(16, kernel_size=(3, 3), padding='same', activation='relu')(x)
+    # Block 2: Separable convolution
+    x = SeparableConv2D(16, kernel_size=(3, 3), padding='same', activation='relu')(x)
     x = BatchNormalization()(x)
     x = MaxPooling2D(pool_size=(2, 2))(x)
     
-    x = Reshape((31, 32 * 16))(x)
-    max_pool = GlobalMaxPooling1D()(x)
-    avg_pool = GlobalAveragePooling1D()(x)
-    concat = Concatenate()([max_pool, avg_pool])
+    # Block 3 & 4: Strided Depthwise-Separable Convolutions preserving 2D temporal-spectral envelope
+    x = SeparableConv2D(32, kernel_size=(3, 3), strides=(2, 2), padding='same', activation='relu')(x)
+    x = BatchNormalization()(x)
+    
+    x = SeparableConv2D(32, kernel_size=(3, 3), strides=(2, 2), padding='same', activation='relu')(x)
+    x = BatchNormalization()(x)
+    
+    # 2D Dual Pooling: captures peak 2D shockwave impulse + sustained envelope energy
+    max_2d = GlobalMaxPooling2D()(x)
+    avg_2d = GlobalAveragePooling2D()(x)
+    concat = Concatenate()([max_2d, avg_2d])
     
     x = Dense(32, activation='relu')(concat)
     x = Dropout(0.3)(x)
